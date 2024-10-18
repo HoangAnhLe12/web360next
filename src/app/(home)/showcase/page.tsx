@@ -7,13 +7,15 @@ import { useImages } from '@/hooks/api/useImage';
 
 interface DataItem {
    id: number;
+   startImage: number;
    title: string;
    description: string;
    thumbnail: string;
+   audio: string;
 }
 
 function ShowcasePage() {
-   const { data: items, isPending, error } = useImages();
+   const { data: items, isPending, error } = useImages('items');
 
    if (isPending)
       return (

@@ -76,7 +76,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, id }) => {
          </div>
          <div
             className={`flex items-center justify-center w-full border border-solid ${
-               isFullScreen ? `h-full` : `h-[500px]`
+               isFullScreen ? `h-full` : `h-screen md:h-[500px] lg:h-[650px] xl:h-[795px] `
             } border-[#fff]`}
          >
             {isLoading && (

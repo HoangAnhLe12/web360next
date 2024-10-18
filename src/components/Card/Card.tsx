@@ -6,9 +6,11 @@ import CustomModal from '@/components/Modal/CustomModal/CustomModal';
 
 interface DataItem {
    id: number;
+   startImage: number;
    title: string;
    description: string;
    thumbnail: string;
+   audio: string;
 }
 
 interface CardItemProps {
@@ -42,7 +44,7 @@ const CardItem: React.FC<CardItemProps> = ({ item }) => {
                <p className="text-[22px]">{item.description}</p>
             </div>
          </Card>
-         <CustomModal isOpen={open} onClose={toggleModal} id={item.id} />
+         <CustomModal isOpen={open} onClose={toggleModal} id={item.startImage} />
       </>
    );
 };

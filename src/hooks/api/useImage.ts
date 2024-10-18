@@ -12,11 +12,11 @@ export const useImagesWithId = (id: number | string, isOpen: boolean) => {
    });
 };
 
-export const useImages = () => {
+export const useImages = (endpoint: string) => {
    return useQuery({
       queryKey: ['images'],
       queryFn: async () => {
-         const response = await axiosInstance.get('/images');
+         const response = await axiosInstance.get(`/${endpoint}`);
          return response.data;
       },
    });
