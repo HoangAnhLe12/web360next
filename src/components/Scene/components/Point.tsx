@@ -1,60 +1,65 @@
 import { useState } from 'react';
 import { Html } from '@react-three/drei';
 import { Tooltip } from 'antd';
-
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import InfoModal from '@/components/Modal/Modal';
 
-interface PointDataWithId {
-   title: string;
+interface PointsPopup {
    id: number;
-}
-
-interface PointDataWithDescription {
    title: string;
    description: string;
+   position: [number, number, number];
+   type: string;
+   videoId: string;
+   audioId: string;
+   images: string[];
 }
 
-type PointData = PointDataWithId | PointDataWithDescription;
+interface PointsGate {
+   id: number;
+   title: string;
+   position: [number, number, number];
+   type: string;
+   targetId: number;
+}
+
+type Points = PointsPopup | PointsGate;
 
 interface PointProps {
-   type: string;
-   position: [number, number, number];
-   data: PointData;
-   onClick: React.Dispatch<React.SetStateAction<number>>;
+   data: Points;
+   onChangeScene: (targetId: number) => void;
+   // onClick: React.Dispatch<React.SetStateAction<number>>;
 }
 
-function Point({ type, position, data, onClick }: PointProps) {
+function Point({ data, onChangeScene }: PointProps) {
    const [hovered, setHovered] = useState(false);
    const [open, setOpen] = useState(false);
    const onClose = () => {
       setOpen(false);
    };
 
-   const typeData = type === 'popup';
+   const typeData = data.type === 'popup';
+
    const handleMouseClick = () => {
       if (typeData) {
-         setOpen(true);
-      } else {
-         if ('id' in data) {
-            onClick(data.id);
-         }
+         setOpen(true); // Mở modal cho loại popup
+      } else if (data.type === 'gate' && 'targetId' in data) {
+         onChangeScene(data.targetId); // Chuyển cảnh cho loại gate
       }
    };
 
    return (
       <group>
-         <mesh
-            scale={[1.5, 1.5, 1.5]}
-            position={position}
-            onClick={handleMouseClick}
-            onPointerOver={() => {
-               setHovered(true);
-               document.body.style.cursor = 'pointer';
-            }}
-            onPointerOut={() => setHovered(false)}
-         >
-            <sphereGeometry args={[5, 16, 16]} />
-            <meshBasicMaterial color="red" opacity={0.7} />
+         <mesh scale={[2, 2, 2]} position={data.position} onPointerOut={() => setHovered(false)}>
+            <Html>
+               <QuestionCircleOutlined
+                  className="cursor-pointer"
+                  style={{ color: 'red', fontSize: '30px' }}
+                  onClick={handleMouseClick}
+                  onMouseOut={() => setHovered(false)}
+                  onMouseOver={() => setHovered(true)}
+               />
+            </Html>
             {hovered && (
                <Html center>
                   <Tooltip title={data.title} color="blue" open={hovered}>
@@ -63,12 +68,11 @@ function Point({ type, position, data, onClick }: PointProps) {
                </Html>
             )}
          </mesh>
-
-         {/* Sử dụng InfoDrawer */}
-         <Html>
-            {/* <InfoDrawer open={open} onClose={onClose} data={data} /> */}
-            <InfoModal open={open} onClose={onClose} data={data} loadingCard={false} screen={false} />
-         </Html>
+         {typeData && (
+            <Html>
+               <InfoModal open={open} onClose={onClose} data={data} />
+            </Html>
+         )}
       </group>
    );
 }

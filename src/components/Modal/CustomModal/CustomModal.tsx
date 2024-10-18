@@ -1,56 +1,111 @@
 'use client';
-import React, { useEffect } from 'react';
-import { BackSide, TextureLoader } from 'three';
-import { Canvas, useLoader } from '@react-three/fiber';
-import { CloseOutlined } from '@ant-design/icons';
-import { OrbitControls } from '@react-three/drei';
+import { useEffect, useState } from 'react';
+import { CloseOutlined, LoadingOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
+import { useImagesWithId } from '@/hooks/api/useImage';
+import { useImagePoints } from '@/hooks/api/usePoints';
+import { Flex, Spin, Result, Button, ConfigProvider } from 'antd';
+import Scene from '@/components/Scene/Scene';
 
 interface CustomModalProps {
    isOpen: boolean;
    onClose: () => void;
-   data: { title: string; url: string };
-   points: unknown;
+   id: number;
 }
 
-const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, data, points }) => {
-   console.log(points);
-   const map = useLoader(TextureLoader, data.url);
+const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, id }) => {
+   const [currentId, setCurrentId] = useState(id); // Quản lý id hiện tại
+   const handleChangeScene = (targetId: number) => {
+      setCurrentId(targetId); // Cập nhật id mới để gọi lại API
+   };
+   const [isFullScreen, setIsFullScreen] = useState(false);
+
+   const {
+      isSuccess: imageSuccess,
+      data: image,
+      isPending: imagePending,
+      isError: imageError,
+   } = useImagesWithId(currentId, isOpen);
+
+   const {
+      isSuccess: pointsSuccess,
+      data: points,
+      isPending: pointsPending,
+      isError: pointsError,
+   } = useImagePoints(currentId, isOpen);
+
    useEffect(() => {
       if (isOpen) {
-         // Vô hiệu hóa cuộn trên body khi modal mở
          document.body.style.overflow = 'hidden';
       } else {
-         // Khôi phục cuộn trên body khi modal đóng
+         setCurrentId(id); // Reset id khi đóng modal
          document.body.style.overflow = 'auto';
       }
-
-      // Khôi phục giá trị ban đầu khi component unmount
       return () => {
          document.body.style.overflow = 'auto';
       };
-   }, [isOpen]);
-   if (!isOpen) return null; // Không hiển thị modal nếu isOpen là false
+   }, [currentId, id, isOpen]);
+
+   if (!isOpen) return null;
+   const toggleFullscreen = () => {
+      if (!isFullScreen) {
+         // Chuyển sang chế độ toàn màn hình
+         document.documentElement.requestFullscreen();
+      } else {
+         // Thoát chế độ toàn màn hình
+         document.exitFullscreen();
+      }
+      setIsFullScreen(!isFullScreen); // Cập nhật trạng thái
+   };
+
+   const isLoading = imagePending || pointsPending;
+   const isError = imageError || pointsError;
+   const isSuccess = imageSuccess && pointsSuccess && image && points;
 
    return (
       <div className="fixed inset-0 w-[100vw] top-0 bottom-0 left-0 right-0 z-[1000] flex flex-col items-center justify-center bg-[#000000e6]">
-         <div className="right-0 top-0 mr-[32px] mt-[25px] absolute z-10 text-[#fff] text-[22px] hover:text-[red]">
-            <CloseOutlined className="" onClick={onClose} />
+         <div className="right-0 top-0 mr-[17px] mt-[19px] absolute z-10 text-[#fff] text-[22px] hover:text-[red]">
+            {!isFullScreen && <CloseOutlined onClick={onClose} />}
          </div>
-         <div className="w-full border border-solid border-[#fff]">
-            <Canvas style={{ height: '485px' }}>
-               <mesh>
-                  <OrbitControls
-                     enableZoom={false}
-                     enablePan={false}
-                     enableDamping
-                     dampingFactor={0.2}
-                     autoRotate={false}
-                     rotateSpeed={-0.1}
+         <div
+            className={`right-0 top-0 ${
+               isFullScreen ? `mr-[20px] mt-[5px] text-[35px]` : `mr-[20px] mt-[80px] text-[30px]`
+            } absolute z-10 text-[#fffffffb]  hover:text-[#eb8e8e]`}
+            onClick={toggleFullscreen}
+         >
+            {isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+         </div>
+         <div
+            className={`flex items-center justify-center w-full border border-solid ${
+               isFullScreen ? `h-full` : `h-[500px]`
+            } border-[#fff]`}
+         >
+            {isLoading && (
+               <Flex align="center" justify="center">
+                  <Spin indicator={<LoadingOutlined style={{ fontSize: 60 }} spin />} />
+               </Flex>
+            )}
+            {isError && (
+               <ConfigProvider
+                  theme={{
+                     token: {
+                        colorTextHeading: '#fff',
+                        colorTextDescription: '#fff',
+                     },
+                  }}
+               >
+                  <Result
+                     status="error"
+                     title="Submission Failed"
+                     subTitle="Please check and modify the following information before resubmitting."
+                     extra={[
+                        <Button type="primary" onClick={() => window.location.reload()} key="reload">
+                           Reload
+                        </Button>,
+                     ]}
                   />
-                  <sphereGeometry attach="geometry" args={[500, 60, 40]} />
-                  <meshBasicMaterial attach="material" map={map} side={BackSide} />
-               </mesh>
-            </Canvas>
+               </ConfigProvider>
+            )}
+            {isSuccess && <Scene data={image[0]} points={points} onChangeScene={handleChangeScene} />}
          </div>
       </div>
    );

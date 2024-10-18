@@ -1,19 +1,34 @@
 'use client';
 import { useState } from 'react';
 import { Button, Modal } from 'antd';
-import { BackSide, TextureLoader } from 'three';
-import { Canvas, useLoader } from '@react-three/fiber';
+
+interface PointsPopup {
+   id: number;
+   title: string;
+   description: string;
+   position: [number, number, number];
+   type: string;
+   videoId: string;
+   audioId: string;
+   images: string[];
+}
+interface PointsGate {
+   id: number;
+   title: string;
+   position: [number, number, number];
+   type: string;
+   targetId: number;
+}
+
+type Points = PointsPopup | PointsGate;
 
 interface InfoModalProps {
    open: boolean;
-   loadingCard: boolean;
    onClose: () => void;
-   data: { title: string; url: string };
-   screen: boolean;
+   data: Points;
 }
 
-export default function InfoModal({ open, loadingCard, onClose, data, screen }: InfoModalProps) {
-   const map = useLoader(TextureLoader, data.url);
+export default function InfoModal({ open, onClose, data }: InfoModalProps) {
    const [loading, setLoading] = useState(false);
 
    const handleOk = () => {
@@ -27,34 +42,18 @@ export default function InfoModal({ open, loadingCard, onClose, data, screen }: 
       <>
          <Modal
             centered
-            width={screen ? '100vw' : '50vw'}
+            width={'50vw'}
             open={open}
-            loading={screen ? loadingCard : false}
-            title={!screen ? data.title : null}
+            title={data.title}
             onCancel={onClose}
-            footer={
-               !screen
-                  ? [
-                       <Button key="link" href="https://google.com" type="primary" loading={loading} onClick={handleOk}>
-                          MoreInfo
-                       </Button>,
-                    ]
-                  : null
-            }
+            footer={[
+               <Button key="link" href="https://google.com" type="primary" loading={loading} onClick={handleOk}>
+                  MoreInfo
+               </Button>,
+            ]}
          >
-            {screen ? (
-               <Canvas style={{ height: '485px' }}>
-                  <mesh>
-                     <sphereGeometry attach="geometry" args={[500, 60, 40]} />
-                     <meshBasicMaterial attach="material" map={map} side={BackSide} />
-                  </mesh>
-               </Canvas>
-            ) : (
-               <>
-                  <p>Content</p>
-                  <p>Content</p>
-               </>
-            )}
+            <p>Content</p>
+            <p>Content</p>
          </Modal>
       </>
    );

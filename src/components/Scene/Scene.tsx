@@ -1,67 +1,111 @@
 'use client';
-import React, { Suspense, useRef, useState } from 'react';
+import React, { Suspense, useRef } from 'react';
 import * as THREE from 'three';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 
 import Dome from './components/Dome';
 import { handleWheel } from './components/Control';
-import { initialData } from '@/Data/Data';
 import Point from './components/Point';
 
-function Scene() {
-   const [which, setWhich] = useState(0);
+interface DataItem {
+   id: number;
+   title: string;
+   description: string;
+   url: string;
+   thumbnail: string;
+   audio: string;
+   setting: {
+      radius: number;
+      widthSegments: number;
+      heightSegments: number;
+      rotate: boolean;
+      isZoom: boolean;
+      enableDamping: boolean;
+      rotateSpeed: number;
+      position: [number, number, number];
+      far: number;
+      dampingFactor: number;
+      near: number;
+      fov: number;
+   };
+}
+
+interface PointsPopup {
+   id: number;
+   title: string;
+   description: string;
+   position: [number, number, number];
+   type: string;
+   videoId: string;
+   audioId: string;
+   images: string[];
+}
+
+interface PointsGate {
+   id: number;
+   title: string;
+   position: [number, number, number];
+   type: string;
+   targetId: number;
+}
+
+type Points = PointsPopup | PointsGate;
+
+interface SceneProps {
+   data: DataItem;
+   points: Points[];
+   onChangeScene: (targetId: number) => void;
+}
+
+function Scene({ data, points, onChangeScene }: SceneProps) {
    const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
 
-   const data = initialData;
+   const map = useLoader(THREE.TextureLoader, data.url);
 
-   const isZoom = true;
+   const [rotate, setRotate] = React.useState(data.setting.rotate);
 
-   const isHavePoints = data[which].points.length > 0;
+   const isZoom = data.setting.isZoom;
 
-   const radius = 500;
-   const widthSegments = 60;
-   const heightSegments = 40;
-
-   const maps = useLoader(
-      THREE.TextureLoader,
-      data.map((entry) => entry.url.src),
-   );
+   const isHavePoints = points.length > 0;
 
    return (
-      <Canvas onWheel={(event) => handleWheel(event, isZoom, cameraRef.current)}>
+      <Canvas
+         onClick={() => setRotate(false)}
+         className="h-[500px]"
+         onWheel={(event) => handleWheel(event, isZoom, cameraRef.current)}
+      >
          <PerspectiveCamera
             ref={cameraRef}
             makeDefault
-            fov={75}
+            fov={data.setting.fov}
             aspect={window.innerWidth / window.innerHeight}
-            near={1}
-            far={1100}
-            position={[0, 0, 5]}
+            near={data.setting.near}
+            far={data.setting.far}
+            position={data.setting.position}
          />
          <OrbitControls
             enableZoom={false}
             enablePan={false}
-            enableDamping
-            dampingFactor={0.2}
-            autoRotate={false}
-            rotateSpeed={-0.1}
+            enableDamping={data.setting.enableDamping}
+            dampingFactor={data.setting.dampingFactor}
+            autoRotate={rotate}
+            rotateSpeed={data.setting.rotateSpeed}
          />
          <Suspense fallback={null}>
             <group>
                <Dome
-                  map={maps[which]}
-                  args={[radius, widthSegments, heightSegments]}
+                  map={map}
+                  args={[data.setting.radius, data.setting.widthSegments, data.setting.heightSegments]}
                   // onDoubleClick={handleCreatePoint}
                />
                {isHavePoints &&
-                  data[which].points.map((point, index) => (
+                  points.map((point) => (
                      <Point
-                        type={point.type}
-                        position={point.position}
-                        data={point.data}
-                        key={index}
-                        onClick={setWhich}
+                        key={point.id}
+                        data={point}
+                        onChangeScene={onChangeScene}
+                        // onClick={() => {}}
                      />
                   ))}
             </group>
