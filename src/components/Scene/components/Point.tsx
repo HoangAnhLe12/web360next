@@ -1,22 +1,26 @@
 import { useState } from 'react';
 import { Html } from '@react-three/drei';
 import { Tooltip } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons';
 import InfoModal from '@/components/Modal/Modal';
 
+interface Image {
+   url: string;
+}
+
 interface PointsPopup {
-   id: number;
+   id: number | string;
    title: string;
    description: string;
    position: [number, number, number];
    type: string;
    videoId: string;
    audioId: string;
-   images: string[];
+   images: Image[];
 }
 
 interface PointsGate {
-   id: number;
+   id: number | string;
    title: string;
    position: [number, number, number];
    type: string;
@@ -28,12 +32,12 @@ type Points = PointsPopup | PointsGate;
 interface PointProps {
    data: Points;
    onChangeScene: (targetId: number) => void;
-   // onClick: React.Dispatch<React.SetStateAction<number>>;
 }
 
 function Point({ data, onChangeScene }: PointProps) {
    const [hovered, setHovered] = useState(false);
    const [open, setOpen] = useState(false);
+
    const onClose = () => {
       setOpen(false);
    };
@@ -52,13 +56,23 @@ function Point({ data, onChangeScene }: PointProps) {
       <group>
          <mesh scale={[2, 2, 2]} position={data.position} onPointerOut={() => setHovered(false)}>
             <Html>
-               <QuestionCircleOutlined
-                  className="cursor-pointer"
-                  style={{ color: 'red', fontSize: '30px' }}
-                  onClick={handleMouseClick}
-                  onMouseOut={() => setHovered(false)}
-                  onMouseOver={() => setHovered(true)}
-               />
+               {typeData ? (
+                  <QuestionCircleOutlined
+                     className="cursor-pointer"
+                     style={{ color: 'red', fontSize: '30px' }}
+                     onClick={handleMouseClick}
+                     onMouseOut={() => setHovered(false)}
+                     onMouseOver={() => setHovered(true)}
+                  />
+               ) : (
+                  <RedoOutlined
+                     className="cursor-pointer"
+                     style={{ color: 'red', fontSize: '30px' }}
+                     onClick={handleMouseClick}
+                     onMouseOut={() => setHovered(false)}
+                     onMouseOver={() => setHovered(true)}
+                  />
+               )}
             </Html>
             {hovered && (
                <Html center>
@@ -68,7 +82,7 @@ function Point({ data, onChangeScene }: PointProps) {
                </Html>
             )}
          </mesh>
-         {typeData && (
+         {typeData && open && (
             <Html>
                <InfoModal open={open} onClose={onClose} data={data} />
             </Html>

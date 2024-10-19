@@ -5,8 +5,8 @@ import { Card } from 'antd';
 import CustomModal from '@/components/Modal/CustomModal/CustomModal';
 
 interface DataItem {
-   id: number;
-   startImage: number;
+   id: number | string;
+   startImage: number | string;
    title: string;
    description: string;
    thumbnail: string;
@@ -22,6 +22,7 @@ const CardItem: React.FC<CardItemProps> = ({ item }) => {
    const toggleModal = () => {
       setOpen(!open);
    };
+
    return (
       <>
          <Card
@@ -35,16 +36,20 @@ const CardItem: React.FC<CardItemProps> = ({ item }) => {
                <img
                   className="w-[100%] max-h-[298px] object-cover border border-solid border-[#f0f0f0]"
                   alt="example"
-                  src={item.thumbnail}
+                  src={
+                     item.thumbnail
+                        ? item.thumbnail
+                        : 'https://wiki.matbao.net/wp-content/uploads/2023/03/cach-khac-phuc-loi-500.png'
+                  }
                />
             }
          >
             <div className="pb-[15px]">
                <h2 className="text-[40px] font-[600]">{item.title}</h2>
-               <p className="text-[22px]">{item.description}</p>
+               <p className="text-[16px]">{item.description}</p>
             </div>
          </Card>
-         <CustomModal isOpen={open} onClose={toggleModal} id={item.startImage} />
+         {!!item.startImage && <CustomModal isOpen={open} onClose={toggleModal} id={item.startImage} />}
       </>
    );
 };

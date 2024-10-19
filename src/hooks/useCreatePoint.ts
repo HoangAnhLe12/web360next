@@ -2,40 +2,9 @@ import { ThreeEvent } from '@react-three/fiber';
 import { useCallback, useRef } from 'react';
 import * as THREE from 'three';
 
-interface PointDataWithId {
-   type: string;
-   position: [number, number, number];
-   data: {
-      title: string;
-      id: number;
-   };
-}
+type UseCreatePointHook = (camera: THREE.Camera, scene: THREE.Scene) => (event: ThreeEvent<MouseEvent>) => void;
 
-interface PointDataWithDescription {
-   type: string;
-   position: [number, number, number];
-   data: {
-      title: string;
-      description: string;
-   };
-}
-
-type PointData = PointDataWithId | PointDataWithDescription;
-
-interface SceneData {
-   [key: string]: unknown;
-   points: PointData[];
-}
-
-type UseCreatePointHook = (
-   camera: THREE.Camera,
-   scene: THREE.Scene,
-   data: SceneData[],
-   setData: React.Dispatch<React.SetStateAction<SceneData[]>>,
-   which: number,
-) => (event: ThreeEvent<MouseEvent>) => void;
-
-const useCreatePoint: UseCreatePointHook = (camera, scene, data, setData, which) => {
+const useCreatePoint: UseCreatePointHook = (camera, scene) => {
    const raycasterRef = useRef(new THREE.Raycaster());
    const mouseRef = useRef(new THREE.Vector2());
 
@@ -55,36 +24,10 @@ const useCreatePoint: UseCreatePointHook = (camera, scene, data, setData, which)
          if (intersects.length > 0) {
             const intersectedPoint = intersects[0].point;
 
-            // Cập nhật dữ liệu
-            const newData = data.map((entry, index) => {
-               if (index === which) {
-                  return {
-                     ...entry,
-                     points: [
-                        ...entry.points,
-                        {
-                           type: 'gate',
-                           position: [intersectedPoint.x, intersectedPoint.y, intersectedPoint.z] as [
-                              number,
-                              number,
-                              number,
-                           ],
-                           data: {
-                              title: 'outside',
-                              id: 1,
-                           },
-                        },
-                     ],
-                  };
-               }
-               return entry;
-            });
-
-            setData(newData);
             console.log('Điểm đã chọn: ', intersectedPoint);
          }
       },
-      [camera, scene, data, setData, which],
+      [camera, scene],
    );
 };
 

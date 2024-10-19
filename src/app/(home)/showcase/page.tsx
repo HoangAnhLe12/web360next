@@ -3,11 +3,11 @@ import { Col, Row, Flex, Spin, Result, Button } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 import CardItem from '@/components/Card/Card';
-import { useImages } from '@/hooks/api/useImage';
+import { useImages } from '@/hooks/api/useApi';
 
 interface DataItem {
-   id: number;
-   startImage: number;
+   id: number | string;
+   startImage: number | string;
    title: string;
    description: string;
    thumbnail: string;

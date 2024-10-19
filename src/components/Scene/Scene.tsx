@@ -8,6 +8,10 @@ import Dome from './components/Dome';
 import { handleWheel } from './components/Control';
 import Point from './components/Point';
 
+interface Image {
+   url: string; // Thay vì chỉ dùng chuỗi, chúng ta định nghĩa cấu trúc cho các hình ảnh
+}
+
 interface DataItem {
    id: number;
    title: string;
@@ -32,18 +36,18 @@ interface DataItem {
 }
 
 interface PointsPopup {
-   id: number;
+   id: number | string;
    title: string;
    description: string;
    position: [number, number, number];
    type: string;
    videoId: string;
    audioId: string;
-   images: string[];
+   images: Image[];
 }
 
 interface PointsGate {
-   id: number;
+   id: number | string;
    title: string;
    position: [number, number, number];
    type: string;
@@ -94,20 +98,9 @@ function Scene({ data, points, onChangeScene }: SceneProps) {
          />
          <Suspense fallback={null}>
             <group>
-               <Dome
-                  map={map}
-                  args={[data.setting.radius, data.setting.widthSegments, data.setting.heightSegments]}
-                  // onDoubleClick={handleCreatePoint}
-               />
+               <Dome map={map} args={[data.setting.radius, data.setting.widthSegments, data.setting.heightSegments]} />
                {isHavePoints &&
-                  points.map((point) => (
-                     <Point
-                        key={point.id}
-                        data={point}
-                        onChangeScene={onChangeScene}
-                        // onClick={() => {}}
-                     />
-                  ))}
+                  points.map((point) => <Point key={point.id} data={point} onChangeScene={onChangeScene} />)}
             </group>
          </Suspense>
       </Canvas>

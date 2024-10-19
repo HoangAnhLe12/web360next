@@ -1,15 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { CloseOutlined, LoadingOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
-import { useImagesWithId } from '@/hooks/api/useImage';
-import { useImagePoints } from '@/hooks/api/usePoints';
+import { useImagesWithId } from '@/hooks/api/useApi';
+import { useImagePoints } from '@/hooks/api/useApi';
 import { Flex, Spin, Result, Button, ConfigProvider } from 'antd';
 import Scene from '@/components/Scene/Scene';
 
 interface CustomModalProps {
    isOpen: boolean;
    onClose: () => void;
-   id: number;
+   id: number | string;
 }
 
 const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, id }) => {
@@ -76,7 +76,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, id }) => {
          </div>
          <div
             className={`flex items-center justify-center w-full border border-solid ${
-               isFullScreen ? `h-full` : `h-screen md:h-[500px] lg:h-[650px] xl:h-[795px] `
+               isFullScreen ? `h-full` : `h-[500px] `
             } border-[#fff]`}
          >
             {isLoading && (
