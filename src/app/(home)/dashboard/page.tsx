@@ -3,9 +3,11 @@ import CreateModal from '@/components/Create/Modal/CreateModal';
 import { useImages } from '@/hooks/api/useApi';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Flex, Result, Spin, Table } from 'antd';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 function Dashboard() {
+   const router = useRouter();
    const { data: items, isPending, error } = useImages('items');
    const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -78,7 +80,16 @@ function Dashboard() {
                {' '}
                Add
             </Button>
-            <Table columns={columns} dataSource={items} />
+            <Table
+               columns={columns}
+               dataSource={items}
+               rowKey={(record) => record.id} // Sử dụng id làm key
+               onRow={(record: { id: string | number }) => ({
+                  onClick: () => {
+                     router.push(`/dashboard/setting/${record.id}`);
+                  },
+               })}
+            />
             <CreateModal open={isModalOpen} onCancel={handleCancel} />
          </div>
       </>

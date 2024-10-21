@@ -24,7 +24,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, id }) => {
       data: image,
       isPending: imagePending,
       isError: imageError,
-   } = useImagesWithId(currentId, isOpen);
+   } = useImagesWithId('images', currentId, isOpen);
 
    const {
       isSuccess: pointsSuccess,

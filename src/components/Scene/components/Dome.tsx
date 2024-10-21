@@ -10,7 +10,10 @@ interface DomeProps {
 function Dome({ map, args }: DomeProps) {
    const { camera, scene } = useThree();
 
-   const handleMouseClick = useCreatePoint(camera, scene);
+   const { handleMouseClick, selectedPoint } = useCreatePoint(camera, scene);
+
+   console.log(selectedPoint);
+
    return (
       <mesh onDoubleClick={handleMouseClick}>
          <sphereGeometry attach="geometry" args={args} />

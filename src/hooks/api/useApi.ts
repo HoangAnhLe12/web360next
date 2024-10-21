@@ -3,11 +3,11 @@ import axiosInstance from '@/lib/axiosInstance';
 import { message } from 'antd';
 
 //Get api images with id
-export const useImagesWithId = (id: number | string, isOpen: boolean) => {
+export const useImagesWithId = (endpoint: string, id: number | string, isOpen: boolean) => {
    return useQuery({
-      queryKey: ['images', id],
+      queryKey: [`${endpoint}`, id],
       queryFn: async () => {
-         const response = await axiosInstance.get(`/images?id=${id}`);
+         const response = await axiosInstance.get(`/${endpoint}?id=${id}`);
          return response.data;
       },
       enabled: isOpen && id != undefined, // Chỉ kích hoạt gọi API khi id không phải là null

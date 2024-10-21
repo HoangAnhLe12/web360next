@@ -1,14 +1,21 @@
 import { ThreeEvent } from '@react-three/fiber';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-type UseCreatePointHook = (camera: THREE.Camera, scene: THREE.Scene) => (event: ThreeEvent<MouseEvent>) => void;
+type UseCreatePointHook = (
+   camera: THREE.Camera,
+   scene: THREE.Scene,
+) => {
+   handleMouseClick: (event: ThreeEvent<MouseEvent>) => void;
+   selectedPoint: THREE.Vector3 | null;
+};
 
 const useCreatePoint: UseCreatePointHook = (camera, scene) => {
    const raycasterRef = useRef(new THREE.Raycaster());
    const mouseRef = useRef(new THREE.Vector2());
+   const [selectedPoint, setSelectedPoint] = useState<THREE.Vector3 | null>(null);
 
-   return useCallback(
+   const handleMouseClick = useCallback(
       (event: ThreeEvent<MouseEvent>) => {
          const raycaster = raycasterRef.current;
          const mouse = mouseRef.current;
@@ -24,11 +31,14 @@ const useCreatePoint: UseCreatePointHook = (camera, scene) => {
          if (intersects.length > 0) {
             const intersectedPoint = intersects[0].point;
 
-            console.log('Điểm đã chọn: ', intersectedPoint);
+            // Lưu điểm đã chọn
+            setSelectedPoint(intersectedPoint);
          }
       },
       [camera, scene],
    );
+
+   return { handleMouseClick, selectedPoint };
 };
 
 export default useCreatePoint;
